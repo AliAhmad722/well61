@@ -9,18 +9,19 @@ export default function HockeyGame() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext("2d")
+
+    const ctx = canvas.getContext("2d")!
     if (!ctx) return
 
     canvas.width = 600
     canvas.height = 400
 
-    // Paddle (hockey stick)
+    // Paddle (stick)
     const paddle = {
       x: canvas.width / 2 - 50,
-      y: canvas.height - 30,
+      y: canvas.height - 20,
       width: 100,
-      height: 15,
+      height: 12,
       speed: 7,
       dx: 0,
     }
@@ -29,18 +30,16 @@ export default function HockeyGame() {
     const puck = {
       x: canvas.width / 2,
       y: canvas.height / 2,
-      size: 12,
+      size: 10,
       dx: 4,
       dy: 4,
     }
 
-    // Draw Paddle
     function drawPaddle() {
       ctx.fillStyle = "white"
       ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height)
     }
 
-    // Draw Puck
     function drawPuck() {
       ctx.beginPath()
       ctx.arc(puck.x, puck.y, puck.size, 0, Math.PI * 2)
@@ -49,24 +48,24 @@ export default function HockeyGame() {
       ctx.closePath()
     }
 
-    // Move Paddle
     function movePaddle() {
       paddle.x += paddle.dx
       if (paddle.x < 0) paddle.x = 0
-      if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width
+      if (paddle.x + paddle.width > canvas.width) {
+        paddle.x = canvas.width - paddle.width
+      }
     }
 
-    // Move Puck
     function movePuck() {
       puck.x += puck.dx
       puck.y += puck.dy
 
-      // Wall collision (left/right)
+      // Left/right wall
       if (puck.x - puck.size < 0 || puck.x + puck.size > canvas.width) {
         puck.dx *= -1
       }
 
-      // Wall collision (top)
+      // Top wall
       if (puck.y - puck.size < 0) {
         puck.dy *= -1
       }
@@ -75,26 +74,23 @@ export default function HockeyGame() {
       if (
         puck.x > paddle.x &&
         puck.x < paddle.x + paddle.width &&
-        puck.y + puck.size > paddle.y &&
-        puck.y - puck.size < paddle.y + paddle.height
+        puck.y + puck.size > paddle.y
       ) {
         puck.dy *= -1
       }
 
-      // Game over (bottom)
+      // Game over
       if (puck.y + puck.size > canvas.height) {
         setGameOver(true)
       }
     }
 
-    // Draw everything
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       drawPaddle()
       drawPuck()
     }
 
-    // Update
     function update() {
       if (gameOver) return
       movePaddle()
@@ -103,7 +99,6 @@ export default function HockeyGame() {
       requestAnimationFrame(update)
     }
 
-    // Controls
     function keyDown(e: KeyboardEvent) {
       if (e.key === "ArrowRight") paddle.dx = paddle.speed
       else if (e.key === "ArrowLeft") paddle.dx = -paddle.speed
@@ -125,10 +120,12 @@ export default function HockeyGame() {
   }, [gameOver])
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-800 to-green-700 text-white">
-      <h1 className="text-4xl font-extrabold mb-4">🏑 Hockey Game</h1>
-      <canvas ref={canvasRef} className="bg-black rounded shadow-lg" />
-      {gameOver && <p className="mt-6 text-xl text-red-400">Game Over! Refresh to Play Again 🚀</p>}
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-900 to-green-800 text-white">
+      <h1 className="text-4xl font-bold mb-4">🏑 Hockey Game</h1>
+      <canvas ref={canvasRef} className="bg-black rounded-lg shadow-lg" />
+      {gameOver && (
+        <p className="mt-4 text-xl text-red-400">Game Over! Refresh to Play Again 🔄</p>
+      )}
     </main>
   )
 }
